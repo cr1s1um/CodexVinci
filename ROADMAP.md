@@ -9,6 +9,12 @@
 - [ ] Browser and offline tests executed successfully
 - [ ] Safari/iOS device validation
 
+## 0.1.3 — MVC foundation
+- [x] Model, View and Controller separated with injected dependencies
+- [x] Headless controller regression tests and all-module HTTP/cache checks
+- [x] MVC ADR and product plan with acceptance gates
+- [ ] Browser regression gate remains open
+
 ## 0.2 — Reliable editing
 - [ ] Evaluate production block editors and AppFlowy reuse against the same scenario
 - [x] Text autosave queue and per-tab session drafts (core tests passed; browser validation pending)
@@ -27,3 +33,5 @@
 - [ ] Desktop and mobile packaging after editor/platform gates
 
 See docs/BACKLOG.md for acceptance criteria. These targets are not a delivery-date commitment.
+
+Product scope and development phases: [docs/PRODUCT-PLAN.md](docs/PRODUCT-PLAN.md).

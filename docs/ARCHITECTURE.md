@@ -47,3 +47,29 @@ Questa consegna non include build o audit completo dei progetti upstream.
 ## Incremento 0.1.2 — Editing
 
 La UI usa src/editing.mjs per serializzare commit e conservare bozze validate in sessionStorage. Il commit continua a controllare la revisione sotto Web Lock. Un ACK cancella la bozza solo se il payload coincide: un commit precedente non elimina input successivi. Recupero esplicito dopo reload, nessun merge automatico. localStorage rimane l’archivio autorevole; sessionStorage è un buffer di sessione, non WAL transazionale o backup durevole. L’export bozze è un JSON di comandi per recupero manuale. IndexedDB/SQLite restano un incremento successivo.
+
+## ADR-006 — MVC obbligatorio (accettata, 22 ottobre 2026)
+
+Da 0.1.3, MVC è il vincolo architetturale del progetto, indipendente dal framework della View.
+
+| Livello | Implementazione | Contratto |
+|---|---|---|
+| Model | `src/model/domain.mjs`, `workspace.mjs` | Validazione, transizioni, query, stato confermato; nessun DOM o storage browser globale |
+| Controller | `src/controllers/workspace-controller.mjs`, `editing.mjs` | Azioni, coda, autosave, recupero bozze, import/export, stato di navigazione |
+| View | `src/views/workspace-view.mjs`, `dom.mjs` | Rendering tramite textContent/value; eventi inoltrati al Controller; nessuna persistenza |
+| Infrastruttura | `src/infrastructure/local-storage.mjs` | Adapter storage e Web Locks iniettati |
+| Composition root | `src/app.mjs` | Iniezione dipendenze, lifecycle browser, download e avvio |
+
+`domain.mjs`, `store.mjs`, `editing.mjs` nella radice src sono re-export di compatibilità, non implementazioni duplicate. I riferimenti precedenti in questo documento descrivono la baseline storica.
+
+Il repository espone `load()` e `save(next, expectedRevision)`, anche asincroni. Il Model pubblica lo stato solo dopo il successo del repository e restituisce snapshot scollegati dalla propria memoria. Il Controller è l'unico punto di serializzazione dei comandi applicativi: chiamare direttamente execute/replace in parallelo non è supportato. L'adapter attuale verifica le revisioni sotto Web Lock.
+
+Il Controller non importa la View: riceve una porta UI con render/status/confirm/prompt/download, bozze, clock e logger. Questo consente test senza DOM, timer reali o storage browser. La View può raggruppare/ordinare per presentazione, ma non validare o persistere il dominio.
+
+Compatibilità: schemaVersion 1, chiavi localStorage/sessionStorage e formato export restano invariati. Nessuna migrazione dati in questo incremento. Cache app shell aggiornata a v3 con tutti i moduli MVC.
+
+## ADR-007 — Prossimo incremento di persistenza (proposta, non implementata)
+
+Valutare IndexedDB sul web tramite lo stesso contratto repository. Requisiti: compare-and-swap della revisione in una transazione readwrite, evento complete come conferma, rollback su abort, migrazione idempotente da localStorage senza eliminare la sorgente e bozze durevoli per scheda. Definire l'identità delle schede e il recupero di bozze orfane; non confondere sessionStorage con crash recovery.
+
+Prima dello switch: test su IndexedDB reale per commit/abort, due schede concorrenti, riavvio, quota, import e ripristino. Nessun fallback silenzioso a seed o localStorage dopo un errore di migrazione. Questa decisione non seleziona ancora lo storage dei client nativi né il protocollo sync.

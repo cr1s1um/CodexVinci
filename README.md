@@ -1,4 +1,4 @@
-# CodexVinci — spike 0.1.2
+# CodexVinci — spike 0.1.3
 
 An open-source, local-first workspace for notes, tasks, and structured knowledge.
 
@@ -48,7 +48,7 @@ node --check server.mjs
 node --check sw.js
 ```
 
-17 test del dominio/storage, coda, bozze e server HTTP superati localmente. Controlli di sintassi superati. Vedere docs/VALIDATION.md per la distinzione tra verificato e da verificare.
+26 test del dominio/storage, Controller MVC, coda, bozze e server HTTP superati localmente. Controlli di sintassi superati. Vedere docs/VALIDATION.md per la distinzione tra verificato e da verificare.
 
 Test browser opzionale: in un secondo terminale, lasciando npm start attivo:
 
@@ -68,4 +68,8 @@ L'archivio locale e gli export **non sono cifrati**. Il server è solo per svilu
 
 ## Licenza
 
-Codice originale rilasciato sotto MIT, vedi LICENSE. Nome e branding definitivi da scegliere. Eventuali componenti terzi futuri richiedono una revisione delle rispettive licenze.
+Codice originale rilasciato sotto MIT, vedi LICENSE. Nome del progetto: CodexVinci. Eventuali componenti terzi futuri richiedono una revisione delle rispettive licenze.
+
+## Architettura MVC
+
+Model in `src/model`, Controller in `src/controllers`, View in `src/views`, adapter in `src/infrastructure`; `src/app.mjs` compone le dipendenze. Il refactoring conserva schema e chiavi degli archivi 0.1.2. Eseguire `npm run check` per controllare tutti i moduli. Vedi [ADR MVC](docs/ARCHITECTURE.md#adr-006--mvc-obbligatorio-accettata-22-ottobre-2026) e [piano di prodotto](docs/PRODUCT-PLAN.md).

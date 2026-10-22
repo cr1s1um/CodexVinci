@@ -1,5 +1,7 @@
 # Backlog ordinato
 
+Aggiornamento 0.1.3: MVC implementato e verificato con test headless. Prossimo incremento: persistenza transazionale (punto 3), poi gate editor e scelta definitiva della base (punti 1–2). Il gate browser della baseline resta obbligatorio. Vedi PRODUCT-PLAN.md per perimetro e dipendenze.
+
 1. **Gate editor/mobile**: confrontare editor OSS a blocchi; prova su Safari/iOS reale (IME, composizione, selezione, undo, paste, 1000 blocchi). Pass: nessuna perdita in salvataggio/riapertura, navigazione touch usabile.
 2. **Gate base applicativa**: build e scenario equivalente su AppFlowy, audit web/self-hosted/licenze, decisione motivata fork vs autonomia.
 3. **Persistenza transazionale**: sostituire localStorage, bozze recuperabili, migrazione v1, backup automatici, test fault injection. Pass: interruzione a ogni fase senza perdita dello stato precedente.

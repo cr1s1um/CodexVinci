@@ -1,5 +1,5 @@
-const CACHE='codexvinci-shell-v2';
-const ASSETS=['/','/index.html','/style.css','/src/app.mjs','/src/domain.mjs','/src/store.mjs','/src/editing.mjs'];
+const CACHE='codexvinci-shell-v3';
+const ASSETS=["/", "/index.html", "/style.css", "/src/app.mjs", "/src/controllers/editing.mjs", "/src/controllers/workspace-controller.mjs", "/src/domain.mjs", "/src/editing.mjs", "/src/infrastructure/local-storage.mjs", "/src/model/domain.mjs", "/src/model/workspace.mjs", "/src/store.mjs", "/src/views/dom.mjs", "/src/views/workspace-view.mjs"];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([self.clients.claim(),caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('codexvinci-shell-')&&k!==CACHE).map(k=>caches.delete(k))))])));
 self.addEventListener('fetch',event=>{

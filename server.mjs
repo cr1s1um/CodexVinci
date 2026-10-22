@@ -1,7 +1,7 @@
 // Server di sviluppo: solo loopback, file consentiti, nessuna dipendenza.
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
-const files=new Map([['/','index.html'],['/index.html','index.html'],['/style.css','style.css'],['/sw.js','sw.js'],...['app','domain','store','editing'].map(n=>[`/src/${n}.mjs`,`src/${n}.mjs`])]);
+const files=new Map([['/','index.html'],['/index.html','index.html'],['/style.css','style.css'],['/sw.js','sw.js'],...["src/app.mjs", "src/controllers/editing.mjs", "src/controllers/workspace-controller.mjs", "src/domain.mjs", "src/editing.mjs", "src/infrastructure/local-storage.mjs", "src/model/domain.mjs", "src/model/workspace.mjs", "src/store.mjs", "src/views/dom.mjs", "src/views/workspace-view.mjs"].map(path=>[`/${path}`,path])]);
 const types={html:'text/html; charset=utf-8',css:'text/css; charset=utf-8',mjs:'text/javascript; charset=utf-8',js:'text/javascript; charset=utf-8'};
 const server=http.createServer(async(req,res)=>{
   try {

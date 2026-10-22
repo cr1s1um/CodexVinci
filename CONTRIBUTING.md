@@ -7,3 +7,5 @@ Run `npm run check` and `npm test` before submitting. HTTP tests start a loopbac
 User content must not enter innerHTML. Validate imported archives before persistence. Preserve IDs and add an explicit migration when changing the archive schema. Test conflict, failure and backup behavior for persistence changes. A successful write must precede a saved status.
 
 Discuss major architecture decisions in an issue and update docs/ARCHITECTURE.md. The current implementation is a spike: do not add cloud sync or credentials without defining the trust model first.
+
+MVC is required. Models must not depend on DOM/browser storage globals; Views must not access persistence or mutate domain state; Controllers orchestrate actions through the Model and injected ports. Wire browser capabilities in src/app.mjs. Keep repository adapters in infrastructure. Add headless controller regression tests for workflow changes and update the HTTP allowlist/service-worker cache whenever modules change.
