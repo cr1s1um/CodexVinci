@@ -1,0 +1,9 @@
+# Contributing to CodexVinci
+
+Work on a feature branch and open a pull request with the problem, behavior change and test evidence. Keep changes focused. Do not commit personal notes, exports, credentials or generated browser artifacts.
+
+Run `npm run check` and `npm test` before submitting. HTTP tests start a loopback server on port 4173: stop the development server first. Browser validation is separate; follow README.md and report the exact browser/platform tested. Never describe skipped tests as passing.
+
+User content must not enter innerHTML. Validate imported archives before persistence. Preserve IDs and add an explicit migration when changing the archive schema. Test conflict, failure and backup behavior for persistence changes. A successful write must precede a saved status.
+
+Discuss major architecture decisions in an issue and update docs/ARCHITECTURE.md. The current implementation is a spike: do not add cloud sync or credentials without defining the trust model first.
