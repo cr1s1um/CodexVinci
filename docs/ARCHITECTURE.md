@@ -43,3 +43,7 @@ Decidere E2EE prima del server di produzione. Un connettore server always-on nec
 - https://developers.google.com/workspace/calendar/api/guides/sync
 
 Questa consegna non include build o audit completo dei progetti upstream.
+
+## Incremento 0.1.2 — Editing
+
+La UI usa src/editing.mjs per serializzare commit e conservare bozze validate in sessionStorage. Il commit continua a controllare la revisione sotto Web Lock. Un ACK cancella la bozza solo se il payload coincide: un commit precedente non elimina input successivi. Recupero esplicito dopo reload, nessun merge automatico. localStorage rimane l’archivio autorevole; sessionStorage è un buffer di sessione, non WAL transazionale o backup durevole. L’export bozze è un JSON di comandi per recupero manuale. IndexedDB/SQLite restano un incremento successivo.

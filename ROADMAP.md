@@ -11,7 +11,8 @@
 
 ## 0.2 — Reliable editing
 - [ ] Evaluate production block editors and AppFlowy reuse against the same scenario
-- [ ] Recoverable drafts, autosave and pending-edit protection
+- [x] Text autosave queue and per-tab session drafts (core tests passed; browser validation pending)
+- [ ] Durable crash recovery and full pending-edit protection
 - [ ] Transactional persistence with migration from v1 archives
 - [ ] Accessible keyboard/touch interaction and undo
 

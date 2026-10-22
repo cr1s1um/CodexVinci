@@ -11,7 +11,7 @@ test('server: asset allowlist, CSP, method restrictions', {timeout:15000}, async
       once(child,'exit').then(()=>{throw new Error('Server exited before startup');}),
       once(child,'error').then(([error])=>{throw error;})
     ]);
-    for(const path of ['/','/index.html','/style.css','/sw.js','/src/app.mjs','/src/domain.mjs','/src/store.mjs']){
+    for(const path of ['/','/index.html','/style.css','/sw.js','/src/app.mjs','/src/domain.mjs','/src/store.mjs','/src/editing.mjs']){
       const r=await fetch('http://127.0.0.1:4173'+path);
       assert.equal(r.status,200,path);
       assert.match(r.headers.get('content-security-policy'),/default-src 'self'/);

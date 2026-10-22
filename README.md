@@ -1,8 +1,8 @@
-# CodexVinci — spike 0.1.1
+# CodexVinci — spike 0.1.2
 
 An open-source, local-first workspace for notes, tasks, and structured knowledge.
 
-Prototipo autonomo di Vincenzo Argese (vaSystems). Nome provvisorio. Non è un fork di Joplin o AppFlowy e non ne incorpora codice.
+Prototipo autonomo di Vincenzo Argese (vaSystems). Non è un fork di Joplin o AppFlowy e non ne incorpora codice.
 
 ## Avvio
 
@@ -23,7 +23,8 @@ Aprire **http://127.0.0.1:4173**. Usare sempre lo stesso host e porta: localhost
 - Attività per pagina: titolo, tre stati, data di scadenza.
 - Vista tabella e Kanban sul medesimo insieme di attività; spostamento mediante selettore di stato, non drag-and-drop.
 - Filtro per titolo delle attività.
-- Salvataggio locale alla fine della modifica del campo (blur/change). Controllare il messaggio di stato prima di chiudere.
+- Autosave dei titoli e blocchi di testo dopo 600 ms di pausa, flush a fine modifica; commit serializzati.
+- Bozze in sessionStorage separate per scheda: recupero dopo reload, salvataggio esplicito, export delle bozze ed eliminazione confermata.
 - Export JSON, import validato con backup preliminare e conferma di sostituzione.
 - Cache dell'app shell tramite service worker per riapertura offline dopo il primo caricamento (ancora da verificare in browser).
 - Web Locks e revisione per rifiutare sovrascritture da schede obsolete.
@@ -36,7 +37,7 @@ Non implementati: database a schema personalizzato, relazioni, tabelle nei docum
 
 Persistenza **localStorage**, limite applicativo 2 MB, 500 pagine e 5000 task. Non è il backend definitivo: le scritture riserializzano l'archivio. I dati possono essere eliminati dalle impostazioni del browser. Export regolare obbligatorio per qualunque dato che si desidera conservare. Non usare questa versione come archivio principale o per dati sensibili.
 
-Non è garantito il salvataggio di un campo ancora in modifica alla chiusura improvvisa. La UI segnala errori, ma non dispone ancora di recupero automatico delle bozze. Dopo un conflitto esportare la sessione e ricaricare. Non sono previsti merge automatici.
+Le bozze vengono scritte durante l’input e recuperate nella stessa sessione della scheda. sessionStorage non garantisce recupero dopo chiusura della scheda/browser o crash. In caso di quota o storage disabilitato, copiare/esportare il testo prima di uscire. L’export dell’archivio contiene solo dati confermati: usare Esporta bozze per le modifiche ancora pendenti (JSON di comandi, non importabile come archivio). Dopo un conflitto esportare archivio e bozze, ricaricare e valutare prima di applicare le bozze. Non sono previsti merge automatici. I nuovi task non ancora aggiunti non hanno recupero bozze.
 
 ## Verifica
 
@@ -47,7 +48,7 @@ node --check server.mjs
 node --check sw.js
 ```
 
-Test del dominio/storage e del server HTTP inclusi. Controlli di sintassi superati. Vedere docs/VALIDATION.md per la distinzione tra verificato e da verificare.
+17 test del dominio/storage, coda, bozze e server HTTP superati localmente. Controlli di sintassi superati. Vedere docs/VALIDATION.md per la distinzione tra verificato e da verificare.
 
 Test browser opzionale: in un secondo terminale, lasciando npm start attivo:
 
