@@ -1,0 +1,4 @@
+node_modules/
+*-check.png
+test-backup.json
+test-results/
