@@ -73,3 +73,17 @@ Compatibilità: schemaVersion 1, chiavi localStorage/sessionStorage e formato ex
 Valutare IndexedDB sul web tramite lo stesso contratto repository. Requisiti: compare-and-swap della revisione in una transazione readwrite, evento complete come conferma, rollback su abort, migrazione idempotente da localStorage senza eliminare la sorgente e bozze durevoli per scheda. Definire l'identità delle schede e il recupero di bozze orfane; non confondere sessionStorage con crash recovery.
 
 Prima dello switch: test su IndexedDB reale per commit/abort, due schede concorrenti, riavvio, quota, import e ripristino. Nessun fallback silenzioso a seed o localStorage dopo un errore di migrazione. Questa decisione non seleziona ancora lo storage dei client nativi né il protocollo sync.
+
+## ADR-008 — Progetti e contenuti condivisi (23 ottobre 2026)
+
+Decisione di progettazione: contenuti con identità autonoma e appartenenze molti-a-molti ai progetti. La gerarchia di navigazione è contestuale alla ProjectEntry; duplicare e associare sono comandi diversi. Link espliciti tra contenuti e progetti alimentano il grafo; il rendering del grafo non richiede inizialmente un database specializzato. Il runtime v1 non implementa ancora queste entità. Specifica e migrazione in [DATA-MODEL.md](DATA-MODEL.md).
+
+## ADR-009 — Grafo, mappe e manoscritto (23 ottobre 2026)
+
+Tre strumenti con modelli separati: grafo come proiezione dei Link, mappa come gerarchia/layout di nodi anche riferiti a Item, disegno come tratti vettoriali di un blocco. Nessuna copia implicita delle note e nessuna deduzione di relazioni dalla posizione sul canvas. Anteprime e token di highlighting sono dati derivati; tratti e layout manuali sono dati autorevoli da esportare e recuperare.
+
+## ADR-010 — Autocompletamento AI differito (23 ottobre 2026)
+
+CompletionProvider iniettato nel Controller, senza accesso autonomo al repository. Contesto selezionato, nessuna espansione implicita dei collegamenti, risposta proposta e applicata solo dopo accettazione su revisione compatibile. Modelli locali e remoti dietro lo stesso contratto; credenziali fuori dall'archivio dei contenuti. Nessuna libreria/provider selezionato in questa revisione.
+
+Diagramma e responsabilità target: [MVC-DESIGN.md](MVC-DESIGN.md). Requisiti aggiornati e fasi: [PRODUCT-PLAN.md](PRODUCT-PLAN.md); criteri verificabili: [BACKLOG.md](BACKLOG.md). Queste decisioni estendono la direzione della baseline, senza dichiarare già implementate le funzionalità pianificate.

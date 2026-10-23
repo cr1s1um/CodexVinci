@@ -1,52 +1,61 @@
 # CodexVinci — prodotto e piano di sviluppo
 
-Stato: proposta di prodotto basata sui requisiti dell'utente; MVC accettato. 22 ottobre 2026.
+Aggiornamento: 23 ottobre 2026. Requisiti dell'utente recepiti; questa revisione aggiunge progettazione, non nuove funzioni al runtime 0.1.3.
 
-## Obiettivo
-Workspace open source local-first: appunti a blocchi, pagine, task e database. Tabella e Kanban sono viste degli stessi record. Piattaforme target: Debian, Windows, macOS, web, iOS, Android; prima validazione web/Debian con gate iOS anticipato. Nessuna promessa di parità tra piattaforme prima delle verifiche.
+## Direzione scelta
 
-## Scenario guida
-Creo “Progetto sito scuola”, scrivo appunti, aggiungo attività, passo da tabella a Kanban, completo un task e riapro offline. Export e ripristino devono conservare dati e identificatori.
+Workspace open source local-first organizzato in progetti. Ogni progetto presenta documenti, attività, database e Kanban. Uno stesso documento può essere associato a più progetti senza duplicazioni; link espliciti formano una rete di conoscenza navigabile. Mappe mentali e appunti manoscritti sono strumenti complementari.
 
-## Brainstorming e priorità
+Piattaforme target: Debian, Windows, macOS, web, iOS, Android. Prima implementazione web/Debian, verifica anticipata di editor e penna su iPad/iOS. MVC resta obbligatorio. Il confronto AppFlowy e l'audit dei componenti rimangono gate per consolidare lo stack di produzione.
 
-| Area | Primo MVP | Evoluzione |
+## Requisiti e perimetro
+
+| ID | Requisito | Soluzione progettata | Consegna |
+|---|---|---|---|
+| R1 | Organizzare note in progetti | Project e ProjectEntry separati dal documento | MVP progetti |
+| R2 | Note, pagine, todo e Kanban per progetto | Documento a blocchi; task condiviso fra viste | MVP progetti |
+| R3 | Collegamenti tra note e progetti | Link tipizzati, backlink, grafo locale/globale filtrato | Incremento conoscenza |
+| R4 | Mappe mentali collegate alle note | Nodi testuali o riferimenti, layout persistito | Incremento visuale |
+| R5 | Note disegnate e manoscritte | Tratti vettoriali modificabili in blocchi drawing | Incremento visuale |
+| R6 | Code syntax highlighting | Linguaggio per blocco, rendering derivato | MVP progetti |
+| R7 | AI per autocompletamento successivo | Provider locale/remoto, contesto e accettazione espliciti | Dopo consolidamento editor |
+
+Richieste precedenti conservate: proprietà database, ricerca, export/import, sync dispositivi, Google Tasks/Calendar e distribuzione sulle sei piattaforme. AI non precede affidabilità, editor e formato dei dati.
+
+## Scenari di accettazione del prodotto
+
+- Creo “Corso informatica” e “Infrastruttura scuola”; la nota “Reti TCP/IP” compare in entrambi con un solo ID. La modifica è visibile da entrambi.
+- Nel progetto creo un task e lo completo da Kanban: tabella e ogni altra vista mostrano lo stesso completamento dopo riapertura offline.
+- Collego la nota a un documento dell'altro progetto: apro backlink e grafo; il titolo può cambiare senza rompere il collegamento.
+- Inserisco la nota in una mappa mentale: spostare il nodo cambia solo il layout; eliminarlo conserva la nota.
+- Scrivo con penna e aggiungo un blocco Python: dopo export/import i tratti restano modificabili, il codice conserva testo e linguaggio.
+- Richiedo un completamento AI usando solo la nota corrente: nessuna nota collegata viene inclusa implicitamente; accetto o scarto la proposta.
+
+## Sequenza di sviluppo
+
+| Fase | Obiettivo | Dipendenze e gate |
 |---|---|---|
-| Taccuino | Pagine/sottopagine, preferiti, ricerca testuale | Cattura rapida, template |
-| Editor | Rich text, titoli, liste, checkbox, codice, immagini, tabelle semplici, undo/redo | Blocchi avanzati e viste incorporate |
-| Task | Titolo, descrizione, stato, priorità, scadenza | Ricorrenze, promemoria, trasformazione blocco→task |
-| Database | Collection, campi testo/numero/data/select/checkbox | Relazioni, formule, rollup |
-| Viste | Tabella/Kanban, filtri e ordinamento | Viste salvate e calendario |
-| Affidabilità | Persistenza transazionale, recupero bozze, cestino, export/import | Cronologia e backup automatici |
-| Conoscenza | Link interni | Backlink, tag, grafo solo se utile |
-| Migrazione | Export nativo completo | Import Joplin con report e allegati |
-| Integrazioni | Nessun servizio necessario per il locale | Google Tasks, poi Calendar |
-| Collaborazione/AI | Escluse dall'MVP | Collaborazione e AI opzionale come progetti separati |
+| D0 — Progettazione | Modello, MVC e backlog | Documenti di questa revisione |
+| F1 — Affidabilità | Transazioni, bozze durevoli, export e migrazione storage | Test browser reali, quota/abort/concorrenza; baseline 0.1.3 |
+| F2 — Progetti | Identità, appartenenze, gerarchie e task per progetto | F1; migrazione v1→v2 e prove di riutilizzo |
+| F3 — Editor e database | Editor selezionato, codice evidenziato, proprietà e viste | F1; spike editor/iOS anticipabile; F2 per integrazione |
+| F4 — Conoscenza | Link, backlink e grafo filtrabile | F2, nodi reference dell'editor; query prima del rendering |
+| F5 — Strumenti visuali | Mappe, asset e manoscritto | F2/F3; asset storage prima del disegno; gate penna iPad |
+| F6 — Interoperabilità | Import Joplin, sync, Google e packaging | Export stabile; protocollo conflitti/E2EE prima del sync |
+| F7 — AI opzionale | Autocompletamento e gestione del contesto | Editor affidabile, revisioni e undo; provider dietro adapter |
 
-Distinzioni di dominio: checkbox del documento ≠ task sincronizzabile; tabella semplice ≠ collection; evento Calendar ≠ task. Il formato canonico è strutturato e versionato; Markdown è un formato di interoperabilità, potenzialmente non fedele.
+F6 e F7 non sono necessariamente sequenziali: l'AI può essere locale prima del sync se i suoi gate sono soddisfatti. Lo spike penna è anticipato per evitare una scelta incompatibile del canvas. Nessuna stima di calendario prima degli spike.
 
-## Fasi e gate
+## Stato e documenti autorevoli
 
-| Fase | Deliverable | Accettazione |
-|---|---|---|
-| 0 — Contratti | MVC, modello attuale, requisiti MVP e ADR | Dipendenze e limiti espliciti |
-| 1 — MVC | Separazione del prototipo e repository iniettato | Test Model/Controller senza DOM; nessuna modifica al formato v1 |
-| 2 — Persistenza | Backend transazionale e migrazione v1 | Commit/abort, quota, recupero e concorrenza verificati nel browser |
-| 3 — Editor | Spike comparativo editor OSS e confronto AppFlowy | IME, selezione, paste, undo/redo, 1000 blocchi su desktop e iOS |
-| 4 — Workspace | Editor integrato, allegati, ricerca, cestino | Progetto completo creabile, esportabile e ripristinabile |
-| 5 — Database | Collection esplicite e proprietà tipizzate | Record coerenti in tutte le viste e round-trip completo |
-| 6 — Alpha | Offline, accessibilità e pacchetto Debian | Workflow guida e matrice browser verificati |
-| 7 — Sync | Protocollo multidispositivo e connettori Google | Conflitti, delete/edit e retry senza perdita silenziosa |
-| 8 — Distribuzione | Client e aggiornamenti per le altre piattaforme | Migrazioni e compatibilità verificate per piattaforma |
+Implementato nella baseline 0.1.3: MVC, pagine/blocchi semplici, task fissi, tabella/Kanban, autosave e bozze di sessione. Progetti, grafo, mappe, penna, highlighting e AI NON sono ancora implementati. La separazione MVC ha 26 test locali passati nella precedente revisione; test visuali/offline/iOS restano aperti.
 
-Stato attuale: fasi 0–1 implementate/documentate in 0.1.3 con gate browser ancora aperto. Fasi successive non implementate. Nessuna data impegnativa fino al gate editor e alla scelta del backend.
+- [Modello dati e migrazione](DATA-MODEL.md)
+- [Diagramma MVC e flussi](MVC-DESIGN.md)
+- [Backlog con dipendenze e criteri di accettazione](BACKLOG.md)
+- [Decisioni architetturali](ARCHITECTURE.md)
+- [Roadmap](../ROADMAP.md)
 
-## Decisioni aperte
-- Editor e wrapper: scegliere dopo lo spike iOS, non dalla sola disponibilità di build.
-- App autonoma: preferenza attuale; completare il confronto AppFlowy prima di consolidare il core di produzione.
-- Sync: revisioni per entità, tombstone, outbox e idempotenza da definire prima del protocollo.
-- E2EE: decidere prima di consolidare il sync; Google client-side vs servizio always-on cambia il modello di fiducia.
-- Licenze: codice attuale MIT; verificare compatibilità di ogni componente introdotto.
+## Esclusioni e decisioni successive
 
-## Flusso GitHub
-Una milestone logica per fase; issue con problema, perimetro, criteri di accettazione e rischi. PR focalizzate con test e limiti; gate browser non verificati restano dichiarati. La milestone non implica una data di consegna. Non aggiungere account, telemetria o upload esterni implicitamente.
+Nessuna collaborazione simultanea, OCR manoscritto, esecuzione di codice, training di reti neurali o formule/rollup nel primo MVP. La futura selezione delle librerie richiede audit licenza, formati esportabili, performance e prove iOS. Nessun servizio esterno necessario per le funzioni locali; nessuna telemetria o trasmissione implicita all'AI.

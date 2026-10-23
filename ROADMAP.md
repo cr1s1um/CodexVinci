@@ -1,37 +1,49 @@
 # CodexVinci roadmap
 
-## 0.1 — Reproducible baseline
-- [x] Pages and typed plain-text blocks
-- [x] Tasks shared by table and board
-- [x] JSON export/import and revision conflict checks
-- [x] Domain/storage tests and HTTP integration test
-- [x] GitHub Actions workflow definition
-- [ ] Browser and offline tests executed successfully
-- [ ] Safari/iOS device validation
+Aggiornata il 23 ottobre 2026. Le fasi sono traguardi funzionali, non versioni già rilasciate o date promesse.
 
-## 0.1.3 — MVC foundation
-- [x] Model, View and Controller separated with injected dependencies
-- [x] Headless controller regression tests and all-module HTTP/cache checks
-- [x] MVC ADR and product plan with acceptance gates
-- [ ] Browser regression gate remains open
+## Baseline 0.1.3 — implementata
+- [x] Pagine, blocchi semplici, task fissi e viste tabella/Kanban
+- [x] Architettura MVC e dipendenze iniettate
+- [x] Autosave, coda e bozze di sessione
+- [x] Export/import JSON v1 e controllo revisioni
+- [x] 26 test locali nella revisione MVC e CI verde del relativo commit
+- [ ] Gate browser/offline/iOS concluso
 
-## 0.2 — Reliable editing
-- [ ] Evaluate production block editors and AppFlowy reuse against the same scenario
-- [x] Text autosave queue and per-tab session drafts (core tests passed; browser validation pending)
-- [ ] Durable crash recovery and full pending-edit protection
-- [ ] Transactional persistence with migration from v1 archives
-- [ ] Accessible keyboard/touch interaction and undo
+## D0 — progettazione estesa
+- [x] Modello logico per progetti, appartenenze e contenuti condivisi
+- [x] Distinzione tra grafo, mappa mentale e disegno
+- [x] Diagramma MVC, migrazione proposta e backlog verificabile
 
-## 0.3 — Structured workspace
-- [ ] Explicit collections, typed fields and record pages
-- [ ] Table/board views with shared filters and sorting
-- [ ] Joplin import with attachment/link mapping and conversion report
+## F1 — affidabilità
+- [ ] Storage transazionale e bozze durevoli
+- [ ] Migrazione storage, backup e ripristino verificati
 
-## Later
-- [ ] Self-hostable device synchronization and documented conflict protocol
-- [ ] Google Tasks connector, then Calendar time blocking
-- [ ] Desktop and mobile packaging after editor/platform gates
+## F2 — workspace a progetti
+- [ ] Progetti, documenti condivisi e gerarchie contestuali
+- [ ] Migrazione v1→v2
+- [ ] Dashboard, todo e Kanban per progetto
 
-See docs/BACKLOG.md for acceptance criteria. These targets are not a delivery-date commitment.
+## F3 — editor e database
+- [ ] Spike editor/iOS e confronto della base applicativa
+- [ ] Editor a blocchi, syntax highlighting e undo
+- [ ] Collection tipizzate e viste coerenti
 
-Product scope and development phases: [docs/PRODUCT-PLAN.md](docs/PRODUCT-PLAN.md).
+## F4 — conoscenza collegata
+- [ ] Link tra contenuti/progetti e backlink
+- [ ] Grafo locale/globale con filtri, budget e navigazione accessibile
+
+## F5 — strumenti visuali
+- [ ] Mappe mentali con riferimenti ai contenuti
+- [ ] Asset, disegno e scrittura a mano; verifica penna iPad
+
+## F6 — interoperabilità e distribuzione
+- [ ] Import Joplin con report
+- [ ] Sync multidispositivo e modello di fiducia/E2EE
+- [ ] Google Tasks e Calendar
+- [ ] Pacchetti Debian, Windows, macOS, iOS e Android; web verificato
+
+## F7 — AI opzionale
+- [ ] Autocompletamento locale/remoto, contesto esplicito e accettazione manuale
+
+[Modello dati](docs/DATA-MODEL.md) · [MVC](docs/MVC-DESIGN.md) · [Piano prodotto](docs/PRODUCT-PLAN.md) · [Backlog e gate](docs/BACKLOG.md)
