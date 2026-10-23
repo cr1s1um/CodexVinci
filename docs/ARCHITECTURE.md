@@ -87,3 +87,13 @@ Tre strumenti con modelli separati: grafo come proiezione dei Link, mappa come g
 CompletionProvider iniettato nel Controller, senza accesso autonomo al repository. Contesto selezionato, nessuna espansione implicita dei collegamenti, risposta proposta e applicata solo dopo accettazione su revisione compatibile. Modelli locali e remoti dietro lo stesso contratto; credenziali fuori dall'archivio dei contenuti. Nessuna libreria/provider selezionato in questa revisione.
 
 Diagramma e responsabilità target: [MVC-DESIGN.md](MVC-DESIGN.md). Requisiti aggiornati e fasi: [PRODUCT-PLAN.md](PRODUCT-PLAN.md); criteri verificabili: [BACKLOG.md](BACKLOG.md). Queste decisioni estendono la direzione della baseline, senza dichiarare già implementate le funzionalità pianificate.
+
+## ADR-011 — Persistenza transazionale 0.1.4 (implementata, 23 ottobre 2026)
+
+IndexedDB versione database 1 con store meta e drafts. Il documento conserva schemaVersion 1. Adapter in infrastructure/indexed-db.mjs: initialize copia la sorgente legacy conservandola, load valida il target, save verifica la revisione e scrive snapshot/ACK della bozza esatta in un'unica transazione. La Promise risolve su complete e fallisce su abort. Il Model passa il comando originale per l'ACK atomico e pubblica solo lo stato confermato.
+
+Bozze: buffer sincrono per rendering più coda asincrona verso IndexedDB. I fallimenti mantengono il testo in memoria, mostrano errore e sono ritentati prima del commit; nessun messaggio “conservata” prima della persistenza. Ogni page instance ha un UUID nuovo; Web Lock a vita della pagina identifica le sessioni attive. Il recupero delle altre sessioni richiede acquisizione esclusiva non bloccante, conferma esplicita e verifica della revisione. L'eliminazione condizionale non rimuove payload più recenti. Senza Web Locks è disponibile export manuale, non applicazione automatica delle bozze altrui.
+
+Migrazione bozze legacy deduplicata tramite SHA-256 del relativo snapshot e marker nella stessa transazione. Sorgente legacy intatta, nessuna riattivazione silenziosa quando la sentinella segnala un database rimosso. Variazioni successive della sorgente legacy vengono segnalate all'avvio. Il dump grezzo di recupero bypassa la validazione, senza scrivere dati. Nessun downgrade automatico dopo errori.
+
+CV-02: implementazione disponibile e test Chromium reali; gate Safari/iOS ancora aperto. Non è ancora il modello multi-entità v2, non aggiunge sync/outbox né garantisce recupero di input non ancora persistiti o di nuovi task non aggiunti. La raccolta di bozze non include garbage collection automatica delle sessioni: limite e cancellazione manuale espliciti. Il localStorage adapter rimane per compatibilità/test, non come fallback di scrittura dell'app.

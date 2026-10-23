@@ -48,7 +48,7 @@ F6 e F7 non sono necessariamente sequenziali: l'AI può essere locale prima del 
 
 ## Stato e documenti autorevoli
 
-Implementato nella baseline 0.1.3: MVC, pagine/blocchi semplici, task fissi, tabella/Kanban, autosave e bozze di sessione. Progetti, grafo, mappe, penna, highlighting e AI NON sono ancora implementati. La separazione MVC ha 26 test locali passati nella precedente revisione; test visuali/offline/iOS restano aperti.
+Implementato nella baseline MVC e nell’incremento 0.1.4: MVC, pagine/blocchi semplici, task fissi, tabella/Kanban, autosave, storage IndexedDB transazionale e bozze persistite per sessione. Progetti, grafo, mappe, penna, highlighting e AI NON sono ancora implementati. La verifica 0.1.4 comprende 37 test Node e test Chromium di UI/offline/recupero/rollback; Safari/iOS resta aperto.
 
 - [Modello dati e migrazione](DATA-MODEL.md)
 - [Diagramma MVC e flussi](MVC-DESIGN.md)

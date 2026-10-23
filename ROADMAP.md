@@ -15,9 +15,12 @@ Aggiornata il 23 ottobre 2026. Le fasi sono traguardi funzionali, non versioni g
 - [x] Distinzione tra grafo, mappa mentale e disegno
 - [x] Diagramma MVC, migrazione proposta e backlog verificabile
 
-## F1 — affidabilità
-- [ ] Storage transazionale e bozze durevoli
-- [ ] Migrazione storage, backup e ripristino verificati
+## F1 — affidabilità (incremento 0.1.4)
+- [x] Storage IndexedDB transazionale e bozze durevoli per sessione
+- [x] Migrazione storage non distruttiva e test di rollback/concorrenza
+- [x] Chromium: offline, recupero dopo chiusura scheda e riavvio browser
+- [ ] Safari/iOS e validazione delle altre piattaforme
+- [ ] Export nativo multi-entità e asset (oltre il JSON v1 attuale)
 
 ## F2 — workspace a progetti
 - [ ] Progetti, documenti condivisi e gerarchie contestuali

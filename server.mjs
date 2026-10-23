@@ -1,7 +1,7 @@
 // Server di sviluppo: solo loopback, file consentiti, nessuna dipendenza.
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
-const files=new Map([['/','index.html'],['/index.html','index.html'],['/style.css','style.css'],['/sw.js','sw.js'],...["src/app.mjs", "src/controllers/editing.mjs", "src/controllers/workspace-controller.mjs", "src/domain.mjs", "src/editing.mjs", "src/infrastructure/local-storage.mjs", "src/model/domain.mjs", "src/model/workspace.mjs", "src/store.mjs", "src/views/dom.mjs", "src/views/workspace-view.mjs"].map(path=>[`/${path}`,path])]);
+const files=new Map([['/','index.html'],['/index.html','index.html'],['/style.css','style.css'],['/sw.js','sw.js'],...["src/app.mjs", "src/controllers/durable-drafts.mjs", "src/controllers/editing.mjs", "src/controllers/workspace-controller.mjs", "src/domain.mjs", "src/editing.mjs", "src/infrastructure/indexed-db.mjs", "src/infrastructure/local-storage.mjs", "src/infrastructure/session-lock.mjs", "src/model/domain.mjs", "src/model/draft-command.mjs", "src/model/workspace.mjs", "src/store.mjs", "src/views/dom.mjs", "src/views/workspace-view.mjs"].map(path=>[`/${path}`,path])]);
 const types={html:'text/html; charset=utf-8',css:'text/css; charset=utf-8',mjs:'text/javascript; charset=utf-8',js:'text/javascript; charset=utf-8'};
 const server=http.createServer(async(req,res)=>{
   try {

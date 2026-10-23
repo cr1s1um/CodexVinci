@@ -1,34 +1,30 @@
-# Verifica 0.1.3
+# Verifica 0.1.4 — 23 ottobre 2026
 
-Ambiente: Node.js 24.19.0, Linux. Nessuna verifica su dispositivi Apple/Android o Windows.
+Ambiente locale: Linux, Node.js 24.19.0, Playwright 1.62.1. Chromium headless 153.0.8010.0, eseguibile ottenuto dal pacchetto npm @sparticuz/chromium 153.0.0 perché il download standard Playwright restituiva un archivio invalido. Questo pacchetto è uno strumento locale di verifica, non una dipendenza del repository. CI installa il Chromium previsto dalla versione Playwright fissata nel lockfile.
 
-| Controllo | Esito |
+| Controllo | Esito locale |
 |---|---|
-| 26 test dominio/Controller/persistenza/bozze/coda/server | PASS |
-| Sintassi di tutti i moduli src, test, scripts e server | PASS |
-| HTTP: tutti i moduli MVC e header CSP | PASS |
-| HTTP: file non consentiti e percorsi sconosciuti | 404, PASS |
-| HTTP: POST non consentito | 405, PASS |
-| Browser Chromium | NON ESEGUITO: eseguibile assente, download restituito non valido |
-| Layout desktop/mobile | NON VERIFICATO VISIVAMENTE |
-| Offline/service worker | IMPLEMENTATO, NON VERIFICATO IN BROWSER |
-| Safari/iOS reale | NON VERIFICATO |
+| Sintassi moduli, test, script e server | PASS |
+| 37 test Node (dominio, Controller, adapter, bozze, HTTP) | PASS |
+| Concorrenza e migrazione IndexedDB | PASS con fake-indexeddb; migrazione anche in Chromium |
+| Abort dopo put, rollback e conservazione bozze | PASS con fake-indexeddb; rollback anche in Chromium reale |
+| Errore quota | Simulato nel test buffer; esaurimento disco/quota reale non verificato |
+| Editing, tabella/Kanban ed export | PASS Chromium |
+| Riapertura offline/service worker | PASS Chromium |
+| Scheda obsoleta e protezione sessione attiva | PASS Chromium |
+| Recupero dopo chiusura scheda e riavvio completo browser | PASS Chromium, profilo temporaneo persistente |
+| Import legacy e ACK senza duplicazione al reload | PASS Chromium |
+| HTML ostile reso inerte e assenza pageerror | PASS Chromium |
+| Layout 1440 px e 390 px | Screenshot ispezionati; nessun overflow orizzontale |
+| Safari/iOS reale, Android, Windows, macOS | NON VERIFICATI |
+| Interruzione fisica alimentazione, perdita disco | NON VERIFICATE |
 
-Test browser riproducibile incluso in tests/browser.cjs: modifica blocchi, creazione attività, passaggio Kanban/tabella, export, larghezza mobile, riapertura offline, conflitto tra schede e contenuti HTML inerti. Non considerarlo passato finché non viene eseguito.
+## Riproduzione
 
-## Verifica manuale prima dell'uso
+npm ci; npm run check; npm test. Per browser: npx playwright install chromium, poi npm run test:browser. Chiudere il server di sviluppo: i test avviano la porta 4173. Usare CODEXVINCI_CHROMIUM_PATH solo per un eseguibile alternativo disponibile. Profilo e dati reali dell'utente non vengono usati. test-results/ è escluso da git.
 
-1. Avviare su loopback, creare una sottopagina e modificare un blocco; uscire dal campo e attendere conferma.
-2. Creare un task, cambiare stato nel Kanban e controllare la tabella.
-3. Esportare JSON, aprire una seconda istanza di test in un profilo browser separato, importare e confrontare i contenuti.
-4. Dopo il primo caricamento/attivazione service worker, interrompere la connessione e riaprire.
-5. Provare due schede contemporanee: la seconda scrittura obsoleta deve essere rifiutata.
-6. Verificare errori storage e non usare dati reali prima di completare il gate browser/mobile.
+## Confini delle prove
 
-## Incremento 0.1.2
+fake-indexeddb testa il contratto e i fallimenti, non le policy di eviction/quota dei browser. Il browser test verifica una chiusura normale completa e riapertura, non un guasto fisico; la bozza deve aver completato la transazione prima della chiusura. Il limite 2 MB resta applicativo. Le nuove funzionalità progetti/grafo/mappe/penna non fanno parte di questa verifica.
 
-Aggiunti sei test: commit concorrenti in ordine, ripresa dopo errore, recupero bozza dopo reload, ACK obsoleto, quota storage, archivio bozze corrotto. Modulo editing incluso nell’allowlist HTTP e nella cache offline. Integrazione UI di autosave/bozze non ancora verificata con browser reale.
-
-## Incremento 0.1.3
-
-Nove test MVC aggiunti: coerenza viste e isolamento snapshot, coda con repository asincrono, errore storage e retry, debounce/composizione/flush, import e backup, import con modifiche concorrenti, conflitto tra Controller, assenza Web Locks, eliminazione bozze e cancellazione timer. Test HTTP esteso a tutti i moduli con controllo della loro presenza nella cache shell. Nessuna nuova verifica visuale o iOS: Chromium non disponibile in questo runtime. Persistenza transazionale NON implementata in questo refactoring.
+Il gate browser desktop ora ha evidenze positive. CV-01 rimane parzialmente aperto per Safari/iOS; CV-02 implementato in questo incremento rimane da validare sulle altre piattaforme. La PR resta in bozza, senza merge automatico.

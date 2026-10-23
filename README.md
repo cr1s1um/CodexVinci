@@ -1,75 +1,67 @@
-# CodexVinci — spike 0.1.3
+# CodexVinci — spike 0.1.4
 
 An open-source, local-first workspace for notes, tasks, and structured knowledge.
 
-Prototipo autonomo di Vincenzo Argese (vaSystems). Non è un fork di Joplin o AppFlowy e non ne incorpora codice.
+Prototipo autonomo di Vincenzo Argese / vaSystems. Codice originale, non fork di Joplin/AppFlowy. Architettura MVC.
 
 ## Avvio
 
-Richiede Node.js >=22 (verificato con 24.19.0). Nessuna dipendenza applicativa, nessun npm install necessario.
+Node.js >=22 (verificato localmente con 24.19.0):
 
 ```bash
-cd CodexVinci
+npm ci
+npm run check
 npm test
 npm start
 ```
 
-Aprire **http://127.0.0.1:4173**. Usare sempre lo stesso host e porta: localhost e 127.0.0.1 hanno archivi distinti. Non aprire index.html via file://.
+Aprire **http://127.0.0.1:4173**. Host e porta identificano l'archivio del browser; localhost e 127.0.0.1 sono archivi distinti. Non usare file://. Le dipendenze npm sono solo di sviluppo/test; il client non carica servizi o librerie da CDN.
 
-## Funzioni implementate
+## Funzioni disponibili
 
-- Pagine e sottopagine; titolo modificabile.
-- Blocchi separati: testo semplice, titolo, codice, checkbox; riordino con frecce, eliminazione confermata.
-- Attività per pagina: titolo, tre stati, data di scadenza.
-- Vista tabella e Kanban sul medesimo insieme di attività; spostamento mediante selettore di stato, non drag-and-drop.
-- Filtro per titolo delle attività.
-- Autosave dei titoli e blocchi di testo dopo 600 ms di pausa, flush a fine modifica; commit serializzati.
-- Bozze in sessionStorage separate per scheda: recupero dopo reload, salvataggio esplicito, export delle bozze ed eliminazione confermata.
-- Export JSON, import validato con backup preliminare e conferma di sostituzione.
-- Cache dell'app shell tramite service worker per riapertura offline dopo il primo caricamento (ancora da verificare in browser).
-- Web Locks e revisione per rifiutare sovrascritture da schede obsolete.
+- Pagine/sottopagine e blocchi testo, titolo, codice semplice e checkbox.
+- Task con tre stati e data; tabella/Kanban sugli stessi record, filtro per titolo.
+- Autosave dopo 600 ms, commit in coda e controllo delle revisioni.
+- **IndexedDB transazionale**: stato pubblicato solo dopo complete; aggiornamento archivio e conferma della bozza esatta nella stessa transazione.
+- Bozze persistite per sessione, recuperabili esplicitamente dopo reload, chiusura scheda o riavvio browser una volta completata la scrittura.
+- Export/import JSON v1 validato, con backup prima della sostituzione.
+- Cache app shell per riapertura offline dopo primo caricamento e attivazione service worker, verificata in Chromium.
 
-## Limiti dichiarati
+## Migrazione e recupero
 
-Questo è uno spike del modello, non un editor rich text di produzione. UI in JavaScript ES modules senza framework; React/TypeScript e l'editor definitivo rimangono una scelta successiva allo spike. Il dominio è isolato dalla UI.
+Al primo avvio l'archivio v1 in localStorage viene validato e copiato in IndexedDB senza cancellare la sorgente. La migrazione è ripetibile e non sovrascrive un target già inizializzato. Le bozze legacy in sessionStorage vengono importate una volta per snapshot; restano da applicare esplicitamente.
 
-Non implementati: database a schema personalizzato, relazioni, tabelle nei documenti, allegati, Markdown/JEX, Google, sync multidispositivo, account, E2EE, applicazioni native, collaborazione, drag-and-drop, undo e cronologia. La collection è per ora implicitamente associata alla pagina; i task sono record a schema fisso.
+Ogni caricamento crea una sessione nuova. **Salva bozze** applica quelle della scheda corrente. **Recupera altre sessioni** considera solo sessioni che non possiedono più il proprio Web Lock; chiede conferma prima di applicare testo che potrebbe essere meno recente dei dati correnti. **Elimina altre sessioni** rimuove esclusivamente le bozze delle sessioni inattive, con conferma. Nessun merge automatico.
 
-Persistenza **localStorage**, limite applicativo 2 MB, 500 pagine e 5000 task. Non è il backend definitivo: le scritture riserializzano l'archivio. I dati possono essere eliminati dalle impostazioni del browser. Export regolare obbligatorio per qualunque dato che si desidera conservare. Non usare questa versione come archivio principale o per dati sensibili.
+**Esporta backup** contiene i dati confermati. **Esporta bozze** comprende input della scheda corrente e bozze persistite delle altre sessioni, con identificatori di sessione; è un file di recupero manuale, non un archivio importabile. Importare un archivio richiede prima di risolvere le bozze pendenti.
 
-Le bozze vengono scritte durante l’input e recuperate nella stessa sessione della scheda. sessionStorage non garantisce recupero dopo chiusura della scheda/browser o crash. In caso di quota o storage disabilitato, copiare/esportare il testo prima di uscire. L’export dell’archivio contiene solo dati confermati: usare Esporta bozze per le modifiche ancora pendenti (JSON di comandi, non importabile come archivio). Dopo un conflitto esportare archivio e bozze, ricaricare e valutare prima di applicare le bozze. Non sono previsti merge automatici. I nuovi task non ancora aggiunti non hanno recupero bozze.
+In caso di archivio illeggibile, la schermata iniziale consente export grezzo di IndexedDB e download delle sorgenti legacy. Il dump grezzo non è un backup importabile dall'interfaccia. La rimozione del database con sentinella legacy ancora presente blocca il riavvio automatico da una copia obsoleta: conservare il profilo e ripristinare consapevolmente. L'eliminazione di tutti i dati del sito rimuove anche la sentinella e non è rilevabile.
+
+Chiudere le schede con versioni precedenti prima dell'aggiornamento. Se il vecchio client modifica la sorgente localStorage dopo la migrazione, il nuovo avvio segnala il problema invece di ignorare o unire le modifiche.
 
 ## Verifica
 
 ```bash
+npm run check
 npm test
-node --check src/app.mjs
-node --check server.mjs
-node --check sw.js
-```
-
-26 test del dominio/storage, Controller MVC, coda, bozze e server HTTP superati localmente. Controlli di sintassi superati. Vedere docs/VALIDATION.md per la distinzione tra verificato e da verificare.
-
-Test browser opzionale: in un secondo terminale, lasciando npm start attivo:
-
-```bash
-npm install --no-save --package-lock=false playwright@1.62.1
 npx playwright install chromium
-node tests/browser.cjs
+npm run test:browser
 ```
 
-Il test usa un profilo browser isolato e genera screenshot e un backup di dati sintetici nella directory corrente. Non è stato completato nell'ambiente di creazione: mancava Chromium e il download non era valido. Non equivale a certificazione Safari/iOS.
+I test avviano il proprio server su 4173: fermare npm start prima di eseguirli. Dipendenze test fissate nel lockfile. Il test browser usa profili isolati e dati sintetici, genera screenshot e backup in test-results/ e verifica anche riavvio completo del browser. Opzionale: CODEXVINCI_CHROMIUM_PATH indica un eseguibile Chromium alternativo.
 
-## Sicurezza e aggiornamenti
+37 test Node passati; browser reale Chromium verificato, inclusi offline, conflitti, rollback e recupero. [Evidenze e limiti](docs/VALIDATION.md). Safari/iOS, Android e guasti fisici del dispositivo non ancora verificati.
 
-Server solo su loopback, allowlist dei file, CSP, nessun accesso a file arbitrari. Nessun servizio esterno o telemetria. Contenuti utente impostati con value/textContent, mai innerHTML. Import limitato e validato, proprietà sconosciute eliminate. Gli errori tecnici registrano codici generici senza contenuti delle note.
+## Limiti
 
-L'archivio locale e gli export **non sono cifrati**. Il server è solo per sviluppo. Per una futura distribuzione web servono HTTPS, autenticazione se prevista e un audit dedicato. Il service worker usa cache-first: cambiare CACHE in sw.js per nuove release dell'app shell; chiudere le schede precedenti per consentire l'attivazione dell'aggiornamento.
+Storage ed export non cifrati; dati eliminabili dal browser o dal sistema. IndexedDB non sostituisce un backup. Un input interrotto prima della conferma della scrittura può andare perso. In caso di quota i dati restano nel buffer della scheda e va eseguito export/copia prima di chiuderla. La garanzia è transazionale, non di persistenza fisica contro perdita di alimentazione.
 
-## Licenza
+Conservati i limiti v1: archivio 2 MB, 500 pagine, 5000 task; bozze totali 1000 / 2 MB, con metadati inclusi. Il workspace viene ancora salvato come snapshot completo. Le nuove attività non ancora aggiunte non hanno recupero bozze. Web Locks serve per distinguere sessioni attive durante recupero/eliminazione; la concorrenza dell'archivio è protetta dalle transazioni IndexedDB anche senza Web Locks. Il bootstrap richiede ancora accesso a localStorage per migrazione/sentinella e a sessionStorage per le bozze legacy.
 
-Codice originale rilasciato sotto MIT, vedi LICENSE. Nome del progetto: CodexVinci. Eventuali componenti terzi futuri richiedono una revisione delle rispettive licenze.
+Non implementati: progetti e documenti condivisi, grafo, mappe mentali, disegno/penna, syntax highlighting, AI, collection personalizzabili, allegati, Joplin import, Google, sync multidispositivo, E2EE, client nativi, collaborazione e undo generale. Vedere [piano prodotto](docs/PRODUCT-PLAN.md) e [roadmap](ROADMAP.md).
 
-## Architettura MVC
+## Sicurezza e architettura
 
-Model in `src/model`, Controller in `src/controllers`, View in `src/views`, adapter in `src/infrastructure`; `src/app.mjs` compone le dipendenze. Il refactoring conserva schema e chiavi degli archivi 0.1.2. Eseguire `npm run check` per controllare tutti i moduli. Vedi [ADR MVC](docs/ARCHITECTURE.md#adr-006--mvc-obbligatorio-accettata-22-ottobre-2026) e [piano di prodotto](docs/PRODUCT-PLAN.md).
+Server di sviluppo solo loopback, allowlist asset, CSP, contenuti tramite textContent/value, import validato, nessuna telemetria. Model in src/model; Controller in src/controllers; View in src/views; adapter in src/infrastructure; src/app.mjs compone le dipendenze. Lo schema dei contenuti rimane v1; la versione del database IndexedDB è separata.
+
+Cache shell v4: chiudere le vecchie schede per attivare l'aggiornamento. Non usare questa versione come archivio principale prima dei gate di piattaforma. Codice MIT; fake-indexeddb e Playwright sono dipendenze di sviluppo Apache-2.0, non incluse nel client browser.

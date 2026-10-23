@@ -12,7 +12,7 @@ export async function createWorkspace(repository) {
     newId: id,
     async execute(action) {
       const next = transition(state, action);
-      state = await repository.save(next, state.revision);
+      state = await repository.save(next, state.revision, action);
     },
     async replace(raw) {
       const imported = parseArchive(raw);

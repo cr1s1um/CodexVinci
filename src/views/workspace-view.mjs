@@ -58,13 +58,13 @@ function render(snapshot){
   const queue=state.pages.filter(p=>p.parentId===null).map(p=>({p,depth:0}));
   while(queue.length){const {p,depth}=queue.shift();nav.append(button(`${depth?'↳ ':''}${p.title}`,()=>{controller.selectPage(p.id);},p.id===selected?'page-link selected':'page-link'));queue.unshift(...state.pages.filter(x=>x.parentId===p.id).map(p=>({p,depth:depth+1})));}
   const importer=el('input',{type:'file',accept:'.json,application/json',hidden:true,onchange:e=>controller.importData(e.target.files[0])});
-  const sidebar=el('aside',{},el('div',{class:'brand',text:'CodexVinci'}),el('p',{class:'eyebrow',text:'PERSONAL WORKSPACE · 0.1.3'}),el('div',{class:'sidebar-heading'},el('span',{text:'Le tue pagine'}),button('+',()=>controller.addPage())),nav,
-    el('div',{class:'sidebar-bottom'},el('p',{text:'Locale, tuo. Nessun account.'}),button('Esporta backup',controller.exportData),button('Salva bozze',controller.recoverDrafts),button('Esporta bozze',()=>controller.exportDrafts()),button('Elimina bozze',controller.discardDrafts),button('Importa archivio',()=>importer.click()),importer,el('small',{text:'Spike tecnico · Google e sync multidispositivo non implementati.'})));
+  const sidebar=el('aside',{},el('div',{class:'brand',text:'CodexVinci'}),el('p',{class:'eyebrow',text:'PERSONAL WORKSPACE · 0.1.4'}),el('div',{class:'sidebar-heading'},el('span',{text:'Le tue pagine'}),button('+',()=>controller.addPage())),nav,
+    el('div',{class:'sidebar-bottom'},el('p',{text:'Locale, tuo. Nessun account.'}),button('Esporta backup',controller.exportData),button('Salva bozze',controller.recoverDrafts),button('Esporta bozze',()=>controller.exportAllDrafts()),button('Recupera altre sessioni',()=>controller.recoverOtherDrafts()),button('Elimina altre sessioni',()=>controller.recoverOtherDrafts(true)),button('Elimina bozze',controller.discardDrafts),button('Importa archivio',()=>importer.click()),importer,el('small',{text:'Spike tecnico · Google e sync multidispositivo non implementati.'})));
   const count=state.tasks.filter(t=>t.pageId===selected).length;
   const main=el('main',{},el('header',{},el('span',{class:'breadcrumb',text:'Workspace / '+page.title}),el('span',{class:'badge',text:'LOCAL FIRST'})),
     el('div',{class:'page-heading'},el('p',{class:'eyebrow',text:'IL TUO SPAZIO DI LAVORO'}),textField('input',{class:'page-title',value:page.title,maxLength:200,'aria-label':'Titolo pagina'},{type:'page.rename',pageId:page.id},'title'),el('p',{class:'subtitle',text:'Appunti e attività, nello stesso posto.'}),button('+ Sottopagina',()=>controller.addPage(selected))),
     el('div',{class:'tabs'},...Object.entries({document:'Documento',table:`Tabella · ${count}`,board:'Kanban'}).map(([key,label])=>button(label,()=>{controller.selectView(key);},view===key?'tab active':'tab'))),
-    view==='document'?documentArea(page):taskArea(),el('footer',{},el('span',{id:'status',text:notice,class:error?'error':''}),el('span',{text:'Autosave dopo 600 ms · bozze nella sessione della scheda'})));
+    view==='document'?documentArea(page):taskArea(),el('footer',{},el('span',{id:'status',text:notice,class:error?'error':''}),el('span',{text:'Autosave dopo 600 ms · bozze in IndexedDB'})));
   root.replaceChildren(sidebar,main);
 }
 return {render, status(message, error=false) {

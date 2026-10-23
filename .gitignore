@@ -1,4 +1,4 @@
 node_modules/
 *-check.png
 test-backup.json
-package-lock.json
+test-results/

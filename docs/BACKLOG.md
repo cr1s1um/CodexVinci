@@ -1,6 +1,6 @@
 # Backlog verificabile — 23 ottobre 2026
 
-Gli ID CV-* sono identificatori di pianificazione, non numeri di issue GitHub. Nessuna di queste funzionalità target è dichiarata completata. Ogni riga è pronta per diventare una issue con scope, dipendenze e test; evitare PR che uniscano storage, editor e sync.
+Gli ID CV-* sono identificatori di pianificazione, non numeri di issue GitHub. Aggiornamento 0.1.4: CV-02 implementato e verificato su Chromium; CV-01 parzialmente soddisfatto, Safari/iOS ancora aperto. Gli altri task rimangono pianificati. Ogni riga è pronta per diventare una issue con scope, dipendenze e test; evitare PR che uniscano storage, editor e sync.
 
 | ID / fase | Deliverable | Dipende da | Criteri di accettazione |
 |---|---|---|---|
@@ -27,7 +27,7 @@ Gli ID CV-* sono identificatori di pianificazione, non numeri di issue GitHub. N
 
 ## Ordine immediato
 
-CV-01 e CV-02 sono il prossimo incremento eseguibile. CV-07 e lo spike di CV-13 possono anticipare le scelte dei componenti; poi CV-03–06 realizzano la prima versione a progetti. Le release funzionali successive sono vincolate ai rispettivi gate, non solo ai test unitari.
+Dopo CV-02, completare il gate Safari/iOS di CV-01; preparare CV-03–06 (export e progetti) mantenendo questo limite esplicito. CV-07 e lo spike di CV-13 possono anticipare le scelte dei componenti; poi CV-03–06 realizzano la prima versione a progetti. Le release funzionali successive sono vincolate ai rispettivi gate, non solo ai test unitari.
 
 ## Fixture e scenari trasversali
 

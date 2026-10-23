@@ -2,7 +2,7 @@ import {createQueue, draftKey} from './editing.mjs';
 import {MAX_BYTES} from '../model/domain.mjs';
 
 /** Orchestrates user actions without DOM or browser storage dependencies. */
-export function createWorkspaceController({model, drafts, ui, clock = globalThis, logger = console}) {
+export function createWorkspaceController({model, drafts, ui, clock = globalThis, logger = console, recovery}) {
   const writes = createQueue(), timers = new Map();
   let selected = model.snapshot().pages[0].id, view = 'document', query = '';
   let notice = drafts.all().length ? 'Bozze recuperate nella scheda: controllale e usa Salva bozze.' : 'Pronto · archivio locale';
@@ -20,8 +20,9 @@ export function createWorkspaceController({model, drafts, ui, clock = globalThis
     const command = structuredClone(action);
     return writes.run(async () => {
       try {
+        await drafts.ready?.();
         await model.execute(command);
-        if (command.type === 'page.rename' || typeof command.text === 'string' || (command.type === 'task.update' && typeof command.title === 'string')) drafts.acknowledge(command);
+        if (command.type === 'page.rename' || typeof command.text === 'string' || (command.type === 'task.update' && typeof command.title === 'string')) await drafts.acknowledge(command);
         status(drafts.all().length ? 'Salvataggio parziale: bozze ancora presenti' : 'Salvato su questo browser');
         if (redraw) render();
         return true;
@@ -33,7 +34,8 @@ export function createWorkspaceController({model, drafts, ui, clock = globalThis
     clock.clearTimeout(timers.get(key)); timers.delete(key);
     try { drafts.put(action); }
     catch { status('Bozza non conservata: esporta o copia il testo prima di uscire.', true); return; }
-    status('Modifica in bozza · salvataggio in attesa');
+    status('Modifica in bozza · persistenza in corso');
+    void drafts.settled?.().then(() => { if (drafts.all().length) status('Bozza conservata · salvataggio in attesa'); }).catch(() => status('Bozza non conservata: esporta o copia il testo prima di uscire.', true));
     if (!composing) {
       const command = structuredClone(action);
       timers.set(key, clock.setTimeout(() => { timers.delete(key); void save(command, false); }, 600));
@@ -49,7 +51,7 @@ export function createWorkspaceController({model, drafts, ui, clock = globalThis
   return {
     render, status, save, stage, flush, exportData,
     idle: () => writes.idle(),
-    hasPending: () => Boolean(writes.pending || drafts.all().length),
+    hasPending: () => Boolean(writes.pending || drafts.pending || drafts.all().length),
     draft: action => drafts.get(action),
     newId: () => model.newId(),
     selectPage(pageId) { selected = pageId; query = ''; render(); },
@@ -69,20 +71,54 @@ export function createWorkspaceController({model, drafts, ui, clock = globalThis
       for (const action of drafts.all()) if (!await save(action, false)) return;
       render();
     },
-    discardDrafts() {
+    async discardDrafts() {
       if (!ui.confirm('Eliminare le bozze non salvate di questa scheda?')) return;
       if (writes.pending) { status('Attendi la fine dei salvataggi prima di eliminare le bozze.', true); return; }
-      try { cancelTimers(); drafts.clear(); status('Bozze eliminate'); render(); } catch (e) { failed(e); }
+      try { cancelTimers(); await drafts.clear(); status('Bozze eliminate'); render(); } catch (e) { failed(e); }
+    },
+    async recoverOtherDrafts(discard = false) {
+      if (!recovery) return;
+      if (writes.pending || drafts.pending || drafts.all().length) { status('Salva o elimina prima le bozze di questa scheda.', true); return; }
+      try {
+        const rows = await recovery.list();
+        if (!rows.length) { status('Nessuna bozza di altre sessioni'); return; }
+        let skipped = false, recoveryFailed = false;
+        for (const sessionId of new Set(rows.map(row => row.sessionId))) {
+          const acquired = await recovery.withSession(sessionId, async () => {
+            const current = (await recovery.list()).filter(row => row.sessionId === sessionId);
+            if (!current.length) return;
+            if (!ui.confirm(`${discard ? 'Eliminare' : 'Applicare ai dati correnti'} ${current.length} bozze della sessione ${sessionId.slice(0, 12)}? ${discard ? 'Operazione non annullabile: esporta prima le bozze.' : 'Le bozze possono sovrascrivere testo più recente: esporta prima archivio e bozze.'}`)) return;
+            for (const row of current) {
+              if (writes.pending || drafts.pending || drafts.all().length) throw new Error('Modifiche in corso: recupero interrotto.');
+              if (!discard) {
+                drafts.put(row.action);
+                if (!await save(row.action, false)) { recoveryFailed = true; return; }
+                await writes.idle();
+              }
+              await recovery.removeExact(row);
+            }
+          });
+          if (recoveryFailed) return;
+          if (!acquired) skipped = true;
+        }
+        render();
+        status(skipped ? 'Sessioni attive escluse: chiudi le altre schede prima di recuperarle.' : 'Operazione sulle bozze terminata');
+      } catch (e) { failed(e); }
+    },
+    async exportAllDrafts() {
+      try { ui.download(JSON.stringify({own: drafts.all(), otherSessions: recovery ? await recovery.list() : []}, null, 2), 'codexvinci-tutte-le-bozze.json'); }
+      catch (e) { failed(e); }
     },
     exportDrafts() { ui.download(JSON.stringify(drafts.all(), null, 2), 'codexvinci-bozze.json'); },
     async importData(file) {
       if (!file) return;
       try {
-        if (writes.pending || drafts.all().length) throw new Error('Salva o elimina le bozze prima di importare un archivio.');
+        if (writes.pending || drafts.pending || drafts.all().length) throw new Error('Salva o elimina le bozze prima di importare un archivio.');
         if (file.size > MAX_BYTES) throw new Error('File troppo grande (massimo 2 MB).');
+        if (recovery && (await recovery.list()).length) throw new Error('Recupera o elimina le bozze delle altre sessioni prima di importare.');
         const raw = await file.text();
         model.validateArchive(raw);
-        if (writes.pending || drafts.all().length) throw new Error('Modifiche in corso: completa il salvataggio prima dell’import.');
+        if (writes.pending || drafts.pending || drafts.all().length) throw new Error('Modifiche in corso: completa il salvataggio prima dell’import.');
         if (!ui.confirm('Sostituire l’archivio locale? Verrà scaricato prima un backup dei dati attuali.')) return;
         await writes.run(async () => {
           if (drafts.all().length) throw new Error('Nuove bozze presenti: import annullato.');

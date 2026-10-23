@@ -77,6 +77,6 @@ test('MVC: no Web Locks means no writes; archive remains intact',async()=>{
   assert.equal(await h.controller.save(rename('Blocked')),false);assert.equal(h.model.snapshot().revision,0);
 });
 test('MVC: draft discard cancels pending autosave without writing the model',async()=>{
-  const h=await setup();h.controller.stage(rename('Discard'));h.controller.discardDrafts();
+  const h=await setup();h.controller.stage(rename('Discard'));await h.controller.discardDrafts();
   assert.equal(h.timers.size,0);assert.equal(h.drafts.all().length,0);assert.equal(h.model.snapshot().revision,0);
 });
